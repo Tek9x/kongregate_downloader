@@ -1,0 +1,90 @@
+
+import re
+
+
+
+class Regex:
+    """
+    Kongregate webpages feature various formats
+    Account for this by iterating through a patternList
+    """
+    rtitle = [
+        re.compile('<meta property="og:title" content="(.*?)" />')
+        ]
+    rversion = [
+        re.compile('var swf_location = "http://.*?game_version=(\d)";')
+    ]
+    rdescription = [
+        re.compile('<meta property="og:description" content=".*?" />')
+        ]
+    rtags = [
+        re.compile('<li class="tag"><a class="term" href="/.*?" rel="tag">(.*?)</a></li>')
+        ]
+    rimage = [
+        re.compile('<meta property="og:image" content="(.*?)\?i10c=img')
+    ]
+    rfbappid = [
+        re.compile('<meta property="fb:app_id" content="(\d*)" />')
+    ]
+    rpageurl = [
+        re.compile('<meta property="og:url" content="(.*?)" />')
+        ]
+    rswfurl = [
+        re.compile('var swf_location = "(.*?version.*?)"')
+        ]
+
+    PATTERNS = {
+        'title' : rtitle,
+        'version' : rversion,
+        'description' : rdescription,
+        'tags' : rtags,
+        'image' : rimage,
+        'fbid' : rfbappid,
+        'pageUrl' : rpageurl,
+        'swfUrl' : rswfurl
+    }
+    # return 1 match string
+    # TODO: refine Regex.search. How does re.search.groups work?
+    def search(ptn, text, multi = False):
+        """
+        #WTF
+        multi = True if ptn in ['tags'] else multi:
+        def a(s):
+    	    s = 0 if s in [4] else s
+	        print(s)
+	    """
+        # Account for known 'findall' re.patterns
+        if ptn in ['tags']: multi = True
+        else: multi = multi
+        for pattern in Regex.PATTERNS[ptn]:
+            """
+            Kongregate webpages feature various formats
+            Account for this by iterating through a patternList
+            """
+            if multi:
+                try: return pattern.findall(text)
+                except: print('FAIL: Regex.search(multi). Attempting default search.')
+            try: return pattern.search(text).group(1)
+            except: return None
+
+    # verfify patterns against offline src files
+    def test(_ = None): # < What was that nessisary?
+        with open('web_src.html') as file:
+            text = file.read()
+            strings = {}
+            for ptn in Regex.PATTERNS:
+                for pattern in Regex.PATTERNS[ptn]:
+                    match = Regex.search(pattern, text)
+                    if match is not None:
+                        strings[ptn] = match
+                    elif ptn not in strings:
+                        strings[ptn] = match
+            for item in strings:
+                print(item, end=': ')
+                print(strings[item])
+
+if __name__ == '__main__':
+    Regex.test()
+
+
+
